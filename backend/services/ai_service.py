@@ -1,0 +1,85 @@
+import os
+from openai import AsyncOpenAI
+from typing import List
+import json
+import uuid
+
+
+USE_MOCK = os.getenv("USE_MOCK_AI", "false").lower() == "true"
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY")) if not USE_MOCK else None
+
+
+async def generate_mock_questions(text: str) -> List[dict]:
+    """Generate mock questions for testing."""
+    questions = []
+    for i in range(10):
+        questions.append({
+            "id": str(uuid.uuid4()),
+            "question": f"Question {i+1} based on the text: What is the main topic?",
+            "options": [
+                f"Option A for question {i+1}",
+                f"Option B for question {i+1}",
+                f"Option C for question {i+1}",
+                f"Option D for question {i+1}"
+            ],
+            "correct_answer": f"Option A for question {i+1}"
+        })
+    return questions
+
+
+async def generate_questions(text: str) -> List[dict]:
+    """Generate 10 multiple choice questions from the given text using OpenAI."""
+    
+    if USE_MOCK:
+        return await generate_mock_questions(text)
+    
+    prompt = f"""Based on the following text, generate exactly 10 multiple choice questions. 
+The questions should test comprehension and key concepts from the text.
+
+Text:
+{text[:4000]}
+
+Return your response as a JSON array with exactly 10 objects, each containing:
+- "question": the question text
+- "options": an array of exactly 4 answer options (mix of correct and incorrect)
+- "correct_answer": the correct answer (must match one of the options exactly)
+
+Make sure the incorrect options are plausible but clearly wrong.
+
+Format:
+[
+  {{
+    "question": "...",
+    "options": ["option1", "option2", "option3", "option4"],
+    "correct_answer": "option1"
+  }},
+  ...
+]"""
+
+    try:
+        response = await client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that generates multiple choice quiz questions."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+        )
+        
+        content = response.choices[0].message.content
+        questions_data = json.loads(content)
+        
+        questions = [
+            {
+                "id": str(uuid.uuid4()),
+                "question": q["question"],
+                "options": q["options"][:4],
+                "correct_answer": q["correct_answer"]
+            }
+            for q in questions_data[:10]
+        ]
+        
+        return questions
+    except Exception as e:
+        raise ValueError(f"Error generating questions: {str(e)}")
+

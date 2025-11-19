@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+openai==2.8.1
+pypdf==6.3.0
+python-multipart==0.0.20
