@@ -21,7 +21,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         content = await file.read()
         
         if len(content) > 10 * 1024 * 1024:
-            raise HTTPException(status_code=400, detail="File size must be less than 10MB")
+            raise HTTPException(status_code=413, detail="File size must be less than 10MB")
         
         text = await extract_text_from_pdf(content)
         
@@ -38,7 +38,11 @@ async def upload_pdf(file: UploadFile = File(...)):
         return QuizResponse(quiz_id=quiz_id, questions=questions)
         
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        error_msg = str(e)
+        # Use 403 for quota/permission errors, 400 for other validation errors
+        if "quota exceeded" in error_msg.lower() or "invalid api key" in error_msg.lower():
+            raise HTTPException(status_code=403, detail=error_msg)
+        raise HTTPException(status_code=400, detail=error_msg)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 

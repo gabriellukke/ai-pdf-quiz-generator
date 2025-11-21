@@ -63,7 +63,7 @@ Format:
 
     try:
         response = await client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant that generates multiple choice quiz questions."},
                 {"role": "user", "content": prompt}
