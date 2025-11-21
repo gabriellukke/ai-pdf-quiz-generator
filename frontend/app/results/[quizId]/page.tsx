@@ -2,16 +2,40 @@
 
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
-import { QUIZ_QUERY_KEYS } from '@/queries/quiz/keys';
-import { QuizResult } from '@/queries/quiz/types';
+import { QuizPageParams } from '@/types/common';
+import { useShareResults } from '@/hooks/useShareResults';
+import { useResultsSummary } from '@/hooks/useResultsSummary';
+import { ResultsHeader } from './_components/ResultsHeader';
+import { ResultsHeroCard } from './_components/ResultsHeroCard';
+import { ResultsSummary } from './_components/ResultsSummary';
+import { ResultsToast } from './_components/ResultsToast';
 
-export default function ResultsPage({ params }: { params: Promise<{ quizId: string }> }) {
+export default function ResultsPage({ params }: QuizPageParams) {
   const { quizId } = use(params);
   const router = useRouter();
-  const queryClient = useQueryClient();
 
-  const results = queryClient.getQueryData<QuizResult>(QUIZ_QUERY_KEYS.results(quizId));
+  const {
+    results,
+    questionsData,
+    score,
+    total,
+    percentage,
+    incorrectAnswers,
+    feedbackMessage,
+    isLoading,
+  } = useResultsSummary(quizId);
+  const { copyToClipboard, toastMessage, dismissToast } = useShareResults({ score, total, percentage });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Loading results...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!results) {
     return (
@@ -29,107 +53,21 @@ export default function ResultsPage({ params }: { params: Promise<{ quizId: stri
     );
   }
 
-  const { score, total, percentage } = results;
-  const passed = percentage >= 70;
-
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 mb-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Quiz Complete!</h1>
-            <div className="mt-6">
-              <div
-                className={`inline-flex items-center justify-center w-32 h-32 rounded-full ${
-                  passed ? 'bg-green-100' : 'bg-red-100'
-                } mb-4`}
-              >
-                <span
-                  className={`text-4xl font-bold ${passed ? 'text-green-700' : 'text-red-700'}`}
-                >
-                  {percentage}%
-                </span>
-              </div>
-              <p className="text-xl text-gray-700">
-                You scored {score} out of {total}
-              </p>
-              {passed ? (
-                <p className="text-green-600 font-medium mt-2">Great job! 🎉</p>
-              ) : (
-                <p className="text-amber-600 font-medium mt-2">Keep practicing! 💪</p>
-              )}
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-10">
+      <div className="max-w-4xl mx-auto px-4 space-y-8 pb-20">
+        <ResultsHeader onBack={() => router.push('/')} onRetake={() => router.push(`/quiz/${quizId}`)} />
 
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => router.push('/')}
-              className="px-6 py-3 border border-gray-300 rounded-lg font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Start New Quiz
-            </button>
-            <button
-              onClick={() => router.push(`/quiz/${quizId}`)}
-              className="px-6 py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-colors"
-            >
-              Retake Quiz
-            </button>
-          </div>
-        </div>
+        <ResultsHeroCard
+          score={score}
+          total={total}
+          percentage={percentage}
+          incorrectAnswers={incorrectAnswers}
+          feedbackMessage={feedbackMessage}
+          onShare={copyToClipboard}
+        />
 
-        <div className="space-y-6">
-          <h2 className="text-2xl font-bold text-gray-900">Review Answers</h2>
-
-          {results.results.map((result, index) => (
-            <div
-              key={result.question_id}
-              className={`bg-white rounded-lg shadow-sm border-2 p-6 ${
-                result.is_correct ? 'border-green-200' : 'border-red-200'
-              }`}
-            >
-              <div className="flex items-start gap-3 mb-4">
-                <div
-                  className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
-                    result.is_correct ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}
-                >
-                  {result.is_correct ? '✓' : '✗'}
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900 mb-3">
-                    Question {index + 1}: {result.question}
-                  </h3>
-
-                  <div className="space-y-2">
-                    <div className="flex items-start gap-2">
-                      <span className="text-sm font-medium text-gray-600 min-w-[100px]">
-                        Your answer:
-                      </span>
-                      <span
-                        className={`text-sm ${
-                          result.is_correct ? 'text-green-700 font-medium' : 'text-red-700'
-                        }`}
-                      >
-                        {result.selected_answer || 'Not answered'}
-                      </span>
-                    </div>
-
-                    {!result.is_correct && (
-                      <div className="flex items-start gap-2">
-                        <span className="text-sm font-medium text-gray-600 min-w-[100px]">
-                          Correct answer:
-                        </span>
-                        <span className="text-sm text-green-700 font-medium">
-                          {result.correct_answer}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <ResultsSummary results={results} questionsData={questionsData} />
 
         <div className="mt-8 flex justify-center gap-4">
           <button
@@ -145,6 +83,8 @@ export default function ResultsPage({ params }: { params: Promise<{ quizId: stri
             Retake Quiz
           </button>
         </div>
+
+        {toastMessage && <ResultsToast message={toastMessage} onDismiss={dismissToast} />}
       </div>
     </div>
   );

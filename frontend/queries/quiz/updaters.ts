@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { QuizResponse } from './types';
+import { QuizResponse, QuizResult } from './types';
 import { QUIZ_QUERY_KEYS } from './keys';
 
 export const useUpdateQuestionsCache = () => {
@@ -24,4 +24,5 @@ export const useInvalidateQuestionsCache = () => {
     [queryClient],
   );
 };
+
 

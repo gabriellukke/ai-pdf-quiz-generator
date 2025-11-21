@@ -2,11 +2,13 @@
 
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useGetQuizQuestions, useUpdateQuizQuestions } from '@/queries/quiz/hooks';
 import { Question } from '@/queries/quiz/types';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
+import { QuizPageParams } from '@/types/common';
 
-export default function EditQuiz({ params }: { params: Promise<{ quizId: string }> }) {
+export default function EditQuiz({ params }: QuizPageParams) {
   const { quizId } = use(params);
   const router = useRouter();
   const [editedQuestions, setEditedQuestions] = useState<Record<string, Question>>({});
@@ -80,11 +82,7 @@ export default function EditQuiz({ params }: { params: Promise<{ quizId: string 
             Back
           </button>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
+            <Image src="/logo.svg" alt="Unstuck Logo" width={40} height={40} />
             <h1 className="text-3xl font-bold text-gray-900">Review & Edit Questions</h1>
           </div>
         </div>

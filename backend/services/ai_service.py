@@ -3,6 +3,7 @@ from openai import AsyncOpenAI
 from typing import List
 import json
 import uuid
+import random
 
 
 USE_MOCK = os.getenv("USE_MOCK_AI", "false").lower() == "true"
@@ -13,16 +14,20 @@ async def generate_mock_questions(text: str) -> List[dict]:
     """Generate mock questions for testing."""
     questions = []
     for i in range(10):
+        options = [
+            f"Option A for question {i+1}",
+            f"Option B for question {i+1}",
+            f"Option C for question {i+1}",
+            f"Option D for question {i+1}"
+        ]
+        correct_answer = options[0]
+        random.shuffle(options)
+        
         questions.append({
             "id": str(uuid.uuid4()),
             "question": f"Question {i+1} based on the text: What is the main topic?",
-            "options": [
-                f"Option A for question {i+1}",
-                f"Option B for question {i+1}",
-                f"Option C for question {i+1}",
-                f"Option D for question {i+1}"
-            ],
-            "correct_answer": f"Option A for question {i+1}"
+            "options": options,
+            "correct_answer": correct_answer
         })
     return questions
 
@@ -69,17 +74,30 @@ Format:
         content = response.choices[0].message.content
         questions_data = json.loads(content)
         
-        questions = [
-            {
+        questions = []
+        for q in questions_data[:10]:
+            options = q["options"][:4]
+            correct_answer = q["correct_answer"]
+            
+            random.shuffle(options)
+            
+            questions.append({
                 "id": str(uuid.uuid4()),
                 "question": q["question"],
-                "options": q["options"][:4],
-                "correct_answer": q["correct_answer"]
-            }
-            for q in questions_data[:10]
-        ]
+                "options": options,
+                "correct_answer": correct_answer
+            })
         
         return questions
     except Exception as e:
-        raise ValueError(f"Error generating questions: {str(e)}")
+        error_message = str(e)
+        
+        if "insufficient_quota" in error_message or "exceeded your current quota" in error_message:
+            raise ValueError("OpenAI API quota exceeded. Please add billing credits to your OpenAI account at https://platform.openai.com/account/billing or contact support.")
+        elif "invalid_api_key" in error_message or "Incorrect API key" in error_message:
+            raise ValueError("Invalid OpenAI API key. Please check your API key configuration.")
+        elif "rate_limit" in error_message:
+            raise ValueError("OpenAI API rate limit exceeded. Please try again in a moment.")
+        else:
+            raise ValueError(f"Error generating questions: {error_message}")
 

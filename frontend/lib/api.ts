@@ -11,7 +11,14 @@ const api = axios.create({
 
 api.interceptors.response.use(
   (response) => response.data,
-  (error) => Promise.reject(error),
+  (error) => {
+    if (error.response?.data?.detail) {
+      const enhancedError = new Error(error.response.data.detail);
+      enhancedError.name = 'APIError';
+      return Promise.reject(enhancedError);
+    }
+    return Promise.reject(error);
+  },
 );
 
 export const apiForFiles = axios.create({
@@ -38,7 +45,14 @@ apiForFiles.interceptors.request.use((config) => {
 
 apiForFiles.interceptors.response.use(
   (response) => response.data,
-  (error) => Promise.reject(error),
+  (error) => {
+    if (error.response?.data?.detail) {
+      const enhancedError = new Error(error.response.data.detail);
+      enhancedError.name = 'APIError';
+      return Promise.reject(enhancedError);
+    }
+    return Promise.reject(error);
+  },
 );
 
 export default api;

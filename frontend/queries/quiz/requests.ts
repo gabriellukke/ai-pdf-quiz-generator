@@ -17,5 +17,9 @@ export default class QuizApi {
   static submitQuiz(quizId: string, submission: QuizSubmission): Promise<QuizResult> {
     return api.post(`/api/quiz/${quizId}/submit`, submission);
   }
+
+  static getQuizResult(quizId: string): Promise<QuizResult> {
+    return api.get(`/api/quiz/${quizId}/result`);
+  }
 }
 

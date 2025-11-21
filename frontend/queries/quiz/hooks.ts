@@ -71,3 +71,14 @@ export const useSubmitQuiz = (
   });
 };
 
+export const useGetQuizResults = (
+  quizId: string,
+  options?: Omit<UseQueryOptions<QuizResult, Error>, 'queryKey' | 'queryFn'>,
+): UseQueryResult<QuizResult, Error> =>
+  useQuery<QuizResult, Error>({
+    queryKey: QUIZ_QUERY_KEYS.results(quizId),
+    queryFn: () => QuizApi.getQuizResult(quizId),
+    enabled: Boolean(quizId),
+    ...options,
+  });
+

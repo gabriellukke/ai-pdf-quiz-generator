@@ -108,11 +108,23 @@ async def submit_quiz(quiz_id: str, submission: QuizSubmission):
     total = len(questions)
     percentage = (correct_count / total * 100) if total > 0 else 0
     
-    return QuizResult(
+    result = QuizResult(
         quiz_id=quiz_id,
         score=correct_count,
         total=total,
         percentage=round(percentage, 2),
         results=results
     )
+
+    quizzes_db[quiz_id]["last_result"] = result
+
+    return result
+
+
+@router.get("/quiz/{quiz_id}/result", response_model=QuizResult)
+async def get_quiz_result(quiz_id: str):
+    if quiz_id not in quizzes_db or "last_result" not in quizzes_db[quiz_id]:
+        raise HTTPException(status_code=404, detail="Quiz results not found")
+
+    return quizzes_db[quiz_id]["last_result"]
 
