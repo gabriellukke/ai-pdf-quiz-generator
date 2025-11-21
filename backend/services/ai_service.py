@@ -71,8 +71,28 @@ Format:
             temperature=0.7,
         )
         
+        if not response.choices or not response.choices[0].message:
+            raise ValueError("OpenAI returned invalid response structure.")
+        
         content = response.choices[0].message.content
-        questions_data = json.loads(content)
+        
+        if not content:
+            raise ValueError("OpenAI returned empty response. Please try again.")
+        
+        # Strip markdown code blocks if present
+        content = content.strip()
+        if content.startswith("```json"):
+            content = content[7:]  # Remove ```json
+        if content.startswith("```"):
+            content = content[3:]  # Remove ```
+        if content.endswith("```"):
+            content = content[:-3]  # Remove closing ```
+        content = content.strip()
+        
+        try:
+            questions_data = json.loads(content)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Failed to parse OpenAI response as JSON: {str(e)}. Response: {content[:200]}")
         
         questions = []
         for q in questions_data[:10]:

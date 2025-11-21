@@ -10,7 +10,7 @@ export function UploadHeader() {
         </h1>
       </div>
       <p className="text-base sm:text-lg text-gray-600 max-w-xl mx-auto px-4">
-        Generate quiz quiz your course materials, or textbooks to help you study faster and smarter.
+        Generate quiz from your course materials, or textbooks to help you study faster and smarter.
       </p>
     </div>
   );

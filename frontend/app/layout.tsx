@@ -11,6 +11,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "AI-Powered PDF Quiz Generator",
   description: "Generate quizzes from PDF documents using AI",
+  icons: {
+    icon: "/logo.svg",
+  },
 };
 
 export default function RootLayout({

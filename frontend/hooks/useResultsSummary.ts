@@ -22,7 +22,8 @@ export function useResultsSummary(quizId: string) {
     if (percentage >= 90) return 'Outstanding work!';
     if (percentage >= 70) return 'Great job!';
     if (percentage >= 50) return 'Nice effort!';
-    return 'Keep practicing!';
+    if (percentage > 0) return 'Keep practicing!';
+    return 'Don\'t give up!';
   }, [percentage]);
 
   return {

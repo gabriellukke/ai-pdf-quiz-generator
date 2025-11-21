@@ -55,6 +55,10 @@ export default function QuizPage({ params }: QuizPageParams) {
     return <LoadingState title="Preparing Quiz for Practice" subtitle="Preparing the quiz so you can now pratice..." />;
   }
 
+  if (submitMutation.isPending) {
+    return <LoadingState title="Submitting Quiz" subtitle="Calculating your results..." />;
+  }
+
   if (isError || !currentQuestion) {
     return (
       <div className="min-h-screen flex items-center justify-center">

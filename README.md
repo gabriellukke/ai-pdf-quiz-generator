@@ -4,15 +4,15 @@ AI-powered quiz generation system with FastAPI, OpenAI GPT-4o-mini, and a Next.j
 
 ## Deployed URLs
 
-Frontend: [Vercel URL - TBD]
+Frontend: https://ai-pdf-quiz-generator-five.vercel.app/
 
-Backend (API): [Render URL - TBD]
+Backend (API): https://ai-pdf-quiz-generator.onrender.com/
 
-API Docs (Swagger): [Backend URL]/docs
+API Docs (Swagger): https://ai-pdf-quiz-generator.onrender.com/docs
 
 ## Tech Stack
 
-**Frontend:** Next.js 16 (App Router) + React 19 + TypeScript, Tailwind CSS v4, TanStack Query v5 (state management), Axios (API client)
+**Frontend:** Next.js 16 (App Router) + React 19 + TypeScript, Tailwind CSS v4, TanStack Query v5 (server state/data fetching), Axios (API client)
 
 **Backend:** FastAPI, Pydantic, PyPDF 6.3, OpenAI API 2.8 (GPT-4o-mini)
 
@@ -209,7 +209,7 @@ curl http://localhost:8000/api/quiz/<quiz_id>/result
 
 ## Design Notes
 
-**Frontend Architecture:** Modern App Router with React Server Components provides automatic code splitting and built-in image optimization. TanStack Query handles all server state with automatic caching, background refetching, and optimistic updates—eliminating the need for additional state management libraries.
+**Frontend Architecture:** Modern App Router with React Server Components provides automatic code splitting and built-in image optimization. TanStack Query manages all server state (API data) with automatic caching, background refetching, and optimistic updates—eliminating the need for additional state management libraries for server data.
 
 **Component Design:** Following modern React patterns, we co-locate page-specific components with their pages (`app/quiz/[quizId]/_components/`) rather than mixing them into a global `components/` folder. This architecture makes ownership clear, simplifies refactoring, and reduces import paths. Truly shared components (LoadingState, Providers) remain in the root `components/` directory. Each page component stays lean (<150 lines) by delegating to smaller, focused subcomponents.
 

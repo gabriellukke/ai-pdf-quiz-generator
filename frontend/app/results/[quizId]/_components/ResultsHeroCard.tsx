@@ -31,7 +31,9 @@ export function ResultsHeroCard({
       </div>
       <div className="relative flex flex-col items-center text-center gap-4">
         <Image src="/checkmark.svg" alt="Success" width={54} height={54} />
-        <p className="text-lg sm:text-xl text-gray-600">{feedbackMessage} You did great on your quiz.</p>
+        <p className="text-lg sm:text-xl text-gray-600">
+          {feedbackMessage}
+        </p>
         <p className="text-4xl sm:text-5xl font-extrabold text-gray-900">
           {score}/{total}
         </p>
